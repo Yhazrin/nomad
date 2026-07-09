@@ -135,9 +135,15 @@ export function MediaLinkEditor({
   );
 }
 
+/* Apple-style container: squircle radius, layered shadow, glass surface. */
 const Wrapper = styled(Flex)`
   pointer-events: all;
   gap: 6px;
   padding: 6px;
   min-width: 350px;
+  background: ${(props) => props.theme.menuBackground};
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-3);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
 `;

@@ -1,6 +1,8 @@
 import { differenceInDays } from "date-fns";
 import { TrashIcon, ArchiveIcon } from "outline-icons";
 import { Trans, useTranslation } from "react-i18next";
+import styled from "styled-components";
+import { transparentize } from "polished";
 import type Document from "~/models/Document";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import Notice from "~/components/Notice";
@@ -23,6 +25,27 @@ function Days(props: { dateTime: string }) {
     </>
   );
 }
+
+/**
+ * Wrapper that retunes the shared Notice component with our refined
+ * Apple-style surface: squircle radius, softer padding, and an
+ * accent-tinted background that adapts to the active theme.
+ *
+ * The shared `<Notice />` does not forward `className` to its inner
+ * container, so we reach it via a descendant selector instead.
+ */
+const NoticesWrapper = styled.div`
+  & > div {
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    background: ${(props) => transparentize(0.92, props.theme.accent)};
+    color: ${(props) => props.theme.text};
+    box-shadow: inset 0 0 0 1px
+      ${(props) => transparentize(0.88, props.theme.accent)};
+    transition: background var(--duration) var(--ease-out),
+      box-shadow var(--duration) var(--ease-out);
+  }
+`;
 
 export default function Notices({ document }: Props) {
   const { t } = useTranslation();
@@ -50,27 +73,29 @@ export default function Notices({ document }: Props) {
 
   return (
     <ErrorBoundary>
-      {document.archivedAt && !document.deletedAt && (
-        <Notice icon={<ArchiveIcon />}>
-          {t("Archived by {{userName}}", {
-            userName: document.updatedBy?.name ?? t("Unknown"),
-          })}
-          &nbsp;
-          <Time dateTime={document.updatedAt} addSuffix />
-        </Notice>
-      )}
-      {document.deletedAt && (
-        <Notice
-          icon={<TrashIcon />}
-          description={permanentlyDeletedDescription()}
-        >
-          {t("Deleted by {{userName}}", {
-            userName: document.updatedBy?.name ?? t("Unknown"),
-          })}
-          &nbsp;
-          <Time dateTime={document.deletedAt} addSuffix />
-        </Notice>
-      )}
+      <NoticesWrapper>
+        {document.archivedAt && !document.deletedAt && (
+          <Notice icon={<ArchiveIcon />}>
+            {t("Archived by {{userName}}", {
+              userName: document.updatedBy?.name ?? t("Unknown"),
+            })}
+            &nbsp;
+            <Time dateTime={document.updatedAt} addSuffix />
+          </Notice>
+        )}
+        {document.deletedAt && (
+          <Notice
+            icon={<TrashIcon />}
+            description={permanentlyDeletedDescription()}
+          >
+            {t("Deleted by {{userName}}", {
+              userName: document.updatedBy?.name ?? t("Unknown"),
+            })}
+            &nbsp;
+            <Time dateTime={document.deletedAt} addSuffix />
+          </Notice>
+        )}
+      </NoticesWrapper>
     </ErrorBoundary>
   );
 }

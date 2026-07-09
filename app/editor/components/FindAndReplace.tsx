@@ -415,7 +415,17 @@ export default function FindAndReplace({
           event.preventDefault();
           inputRef.current?.focus();
         }}
-        style={{ marginRight: 16, marginTop: 60 }}
+        style={{
+          marginRight: 16,
+          marginTop: 60,
+          /* Apple-style squircle radius for the popover shell. */
+          borderRadius: "var(--radius-md)",
+          /* Layered ambient shadow — tight close + wide diffused. */
+          boxShadow: "var(--shadow-3)",
+          /* Glass surface: backdrop blur is safe on this fixed popover. */
+          backdropFilter: "saturate(180%) blur(20px)",
+          WebkitBackdropFilter: "saturate(180%) blur(20px)",
+        }}
       >
         <Content column>
           <Flex gap={4}>

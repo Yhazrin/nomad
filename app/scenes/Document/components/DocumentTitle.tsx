@@ -54,8 +54,8 @@ type Props = {
   onBlur?: React.FocusEventHandler<HTMLSpanElement>;
 };
 
-const lineHeight = "1.25";
-const fontSize = "2.25em";
+const lineHeight = "1.2";
+const fontSize = "26px";
 
 const DocumentTitle = React.forwardRef(function DocumentTitle_(
   {
@@ -300,7 +300,9 @@ const Title = styled(ContentEditable)<TitleProps>`
   margin-top: 8vh;
   margin-bottom: 0.5em;
   font-size: ${fontSize};
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: ${s("text")};
   border: 0;
   padding: 0;
   cursor: ${(props) => (props.readOnly ? "default" : "text")};
@@ -334,6 +336,7 @@ const Title = styled(ContentEditable)<TitleProps>`
   ${breakpoint("tablet")`
     margin-top: 6vh;
     margin-left: 0;
+    font-size: 32px;
 
     &:hover {
       ${PopoverButton} {

@@ -9,7 +9,7 @@ import type Document from "~/models/Document";
 import type Revision from "~/models/Revision";
 import type Template from "~/models/Template";
 import { openDocumentInsights } from "~/actions/definitions/documents";
-import DocumentMeta, { Separator } from "~/components/DocumentMeta";
+import DocumentMeta, { Separator as BaseSeparator } from "~/components/DocumentMeta";
 import Fade from "~/components/Fade";
 import useCurrentTeam from "~/hooks/useCurrentTeam";
 import { useLocationSidebarContext } from "~/hooks/useLocationSidebarContext";
@@ -26,6 +26,28 @@ type Props = {
   to?: LocationDescriptor;
   rtl?: boolean;
 };
+
+/**
+ * Subtle separator rendered between meta fields. Uses a slim pill so it
+ * reads as a typographic divider rather than the heavier bullet character
+ * from the base DocumentMeta component.
+ */
+const Separator = styled(BaseSeparator)`
+  padding: 0 0.5em;
+  color: ${(props) => props.theme.textTertiary};
+  opacity: 0.55;
+
+  &::after {
+    content: "";
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    border-radius: var(--radius-pill);
+    background: currentColor;
+    vertical-align: middle;
+    transform: translateY(-1px);
+  }
+`;
 
 function TitleDocumentMeta({ to, document, revision, rtl, ...rest }: Props) {
   const { views, comments, ui } = useStores();

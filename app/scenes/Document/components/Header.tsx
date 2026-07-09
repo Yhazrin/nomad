@@ -1,5 +1,7 @@
 import { observer } from "mobx-react";
 import { TableOfContentsIcon, EditIcon } from "outline-icons";
+import { transparentize } from "polished";
+import * as React from "react";
 import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -24,6 +26,7 @@ import { type Editor } from "~/editor";
 import useCurrentTeam from "~/hooks/useCurrentTeam";
 import useCurrentUser from "~/hooks/useCurrentUser";
 import useEditingFocus from "~/hooks/useEditingFocus";
+import useEventListener from "~/hooks/useEventListener";
 import useKeyDown from "~/hooks/useKeyDown";
 import { useLocationSidebarContext } from "~/hooks/useLocationSidebarContext";
 import useMobile from "~/hooks/useMobile";
@@ -36,6 +39,8 @@ import TemplatesMenu from "~/menus/TemplatesMenu";
 import type Document from "~/models/Document";
 import type Revision from "~/models/Revision";
 import type Template from "~/models/Template";
+import { supportsPassiveListener } from "@shared/utils/browser";
+import { throttle } from "es-toolkit/compat";
 import { documentEditPath } from "~/utils/routeHelpers";
 import { ChangesNavigation } from "./ChangesNavigation";
 import ObservingBanner from "./ObservingBanner";
@@ -92,6 +97,21 @@ function DocumentHeader({
   const sidebarContext = useLocationSidebarContext();
   const [measureRef, size] = useMeasure();
   const isMobile = isMobileMedia || (size.width > 0 && size.width < 700);
+
+  // Track scroll state to apply a subtle border + background when the
+  // user has scrolled past the document header.
+  const [isScrolled, setScrolled] = useState(false);
+  const handleHeaderScroll = React.useMemo(
+    () => throttle(() => setScrolled(window.scrollY > 8), 50),
+    []
+  );
+
+  useEventListener(
+    "scroll",
+    handleHeaderScroll,
+    window,
+    supportsPassiveListener ? { passive: true } : { capture: false }
+  );
 
   // We cache this value for as long as the component is mounted so that if you
   // apply a template there is still the option to replace it until the user
@@ -177,6 +197,7 @@ function DocumentHeader({
     <StyledHeader
       ref={measureRef}
       $hidden={isEditingFocus}
+      $scrolled={isScrolled}
       hasSidebar
       left={
         isMobile ? (
@@ -314,9 +335,20 @@ function DocumentHeader({
   );
 }
 
-const StyledHeader = styled(Header)<{ $hidden: boolean }>`
-  transition: opacity 500ms ease-in-out;
+const StyledHeader = styled(Header)<{ $hidden: boolean; $scrolled: boolean }>`
+  transition: opacity var(--duration) var(--ease-out),
+    box-shadow var(--duration) var(--ease-out),
+    background var(--duration) var(--ease-out);
   ${(props) => props.$hidden && "opacity: 0;"}
+
+  ${(props) =>
+    props.$scrolled &&
+    `
+      box-shadow: inset 0 -1px 0 ${transparentize(0.85, props.theme.text)};
+      background: ${transparentize(0.2, props.theme.background)};
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    `}
 `;
 
 const TocButton = styled(Button)`

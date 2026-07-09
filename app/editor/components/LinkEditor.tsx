@@ -205,7 +205,7 @@ const LinkEditor: React.FC<Props> = ({
   ];
 
   return (
-    <div ref={wrapperRef}>
+    <Wrapper ref={wrapperRef}>
       <InputWrapper>
         <Input
           ref={inputRef}
@@ -271,9 +271,20 @@ const LinkEditor: React.FC<Props> = ({
           )}
         </ResizingHeightContainer>
       </SearchResults>
-    </div>
+    </Wrapper>
   );
 };
+
+/* Apple-style outer container: squircle radius, layered ambient shadow,
+   glass surface. */
+const Wrapper = styled.div`
+  pointer-events: all;
+  background: ${s("menuBackground")};
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-3);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+`;
 
 const InputWrapper = styled(Flex)`
   pointer-events: all;
@@ -284,7 +295,9 @@ const InputWrapper = styled(Flex)`
 
 const SearchResults = styled(Scrollable)<{ $hasResults: boolean }>`
   background: ${s("menuBackground")};
-  box-shadow: ${(props) => (props.$hasResults ? s("menuShadow") : "none")};
+  /* Apple-style layered shadow — tight close + wide diffused ambient. */
+  box-shadow: ${(props) =>
+    props.$hasResults ? "var(--shadow-3)" : "none"};
   clip-path: inset(0px -100px -100px -100px);
   position: absolute;
   top: 100%;
@@ -292,7 +305,8 @@ const SearchResults = styled(Scrollable)<{ $hasResults: boolean }>`
   height: auto;
   left: 0;
   margin-top: -6px;
-  border-radius: 0 0 4px 4px;
+  /* Apple-style squircle radius on the drop-down tail. */
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
   padding: ${(props) => (props.$hasResults ? "6px" : "0")};
   max-height: 240px;
   pointer-events: all;
