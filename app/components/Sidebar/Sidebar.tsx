@@ -389,7 +389,12 @@ const Container = styled(Flex)<ContainerProps>`
     transform: none;
   }
 
-  & > div {
+  /* Apply the show/hide opacity to ALL direct children so every nav
+     section, account menu, and toggle button fades together when the
+     sidebar collapses. Earlier the selector only matched direct div
+     children, which leaked AccountMenu / sidebar children rendered as
+     other tags into the visible 16px strip when collapsed. */
+  & > * {
     transition: opacity var(--duration-fast) var(--ease-out);
     opacity: ${(props) => {
       if (props.$hidden) {
@@ -405,6 +410,19 @@ const Container = styled(Flex)<ContainerProps>`
       }
     }};
   }
+
+  /* When collapsed, the sidebar reduces to a thin vertical "tab handle"
+     hugging the window edge. Aggressive glass / shadow / background tint
+     create visible artifacts on the 16px strip, so we strip them down. */
+  ${(props: ContainerProps) =>
+    props.$collapsed &&
+    `
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border: none;
+    `}
 
   /* Hide the resize grab handle when collapsed — otherwise its 2px sliver
      is visible on the right edge of the floating collapsed strip and
