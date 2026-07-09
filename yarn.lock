@@ -15343,7 +15343,7 @@ __metadata:
     prosemirror-inputrules: "npm:^1.5.1"
     prosemirror-keymap: "npm:^1.2.3"
     prosemirror-markdown: "npm:^1.13.4"
-    prosemirror-model: "npm:^1.25.4"
+    prosemirror-model: "npm:^1.25.10"
     prosemirror-schema-list: "npm:^1.5.1"
     prosemirror-state: "npm:^1.4.4"
     prosemirror-tables: "npm:^1.8.5"
@@ -16856,6 +16856,15 @@ __metadata:
   dependencies:
     orderedmap: "npm:^2.0.0"
   checksum: 10c0/5ba99a235497df3452c0e2dfb71ee05d898fb9cb539c2a92583524fc4f337d8abab5c6b49b3af242c86327ea27cce41c7169a1e0c7bb4f7ef1502b311bd00cfc
+  languageName: node
+  linkType: hard
+
+"prosemirror-model@npm:^1.25.10":
+  version: 1.25.10
+  resolution: "prosemirror-model@npm:1.25.10"
+  dependencies:
+    orderedmap: "npm:^2.0.0"
+  checksum: 10c0/7a32d97cc3519004bf7c1e3cd45a1955214e4fb5a83ed47b45fe0bc252cce7e3b3c5d1b5edfc173d5c71e3643e2bab88fc9c49f9bb80f3a4552198e85ba5db8d
   languageName: node
   linkType: hard
 
