@@ -14,6 +14,11 @@ import Fix from "./decorators/Fix";
 export enum RelationshipType {
   Backlink = "backlink",
   Similar = "similar",
+  Supports = "supports",
+  Decides = "decides",
+  DependsOn = "depends_on",
+  SourceFor = "source_for",
+  Supersedes = "supersedes",
 }
 
 @Table({ tableName: "relationships", modelName: "relationship" })
@@ -49,6 +54,16 @@ class Relationship extends IdModel<
     defaultValue: RelationshipType.Backlink,
   })
   type: RelationshipType;
+
+  /**
+   * Free-text provenance note supplied by the user when creating the edge.
+   * Used to surface the reasoning behind the link in the UI.
+   */
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  source: string | null;
 
   /**
    * Find all backlinks for a document that the user has access to.

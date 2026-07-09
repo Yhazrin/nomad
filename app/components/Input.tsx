@@ -99,9 +99,11 @@ export const InputContainer = styled.div<{
   border-radius: var(--radius-md);
   overflow: hidden;
   /* Subtle inset highlight at the top edge, like a real input surface */
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5),
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
     0 1px 1px rgba(15, 23, 42, 0.02);
-  transition: border-color var(--duration-fast) var(--ease-out),
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out),
     background var(--duration-fast) var(--ease-out);
 

@@ -1,6 +1,5 @@
 import * as React from "react";
 import styled, { keyframes } from "styled-components";
-import { s } from "@shared/styles";
 
 /**
  * Loading — inline indicator for async content.

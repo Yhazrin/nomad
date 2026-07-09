@@ -32,3 +32,30 @@ export const RelationshipsListSchema = BaseSchema.extend({
 });
 
 export type RelationshipsListReq = z.infer<typeof RelationshipsListSchema>;
+
+export const RelationshipsCreateSchema = BaseSchema.extend({
+  body: z.object({
+    /** Source document of the edge. */
+    sourceDocumentId: z.string().refine(ValidateDocumentId.isValid, {
+      message: ValidateDocumentId.message,
+    }),
+    /** Target document of the edge. */
+    targetDocumentId: z.string().refine(ValidateDocumentId.isValid, {
+      message: ValidateDocumentId.message,
+    }),
+    /** Semantic type of the edge. */
+    type: z.enum(RelationshipType),
+    /** Optional free-text provenance note. */
+    source: z.string().trim().max(2000).optional(),
+  }),
+});
+
+export type RelationshipsCreateReq = z.infer<typeof RelationshipsCreateSchema>;
+
+export const RelationshipsDeleteSchema = BaseSchema.extend({
+  body: z.object({
+    id: z.uuid(),
+  }),
+});
+
+export type RelationshipsDeleteReq = z.infer<typeof RelationshipsDeleteSchema>;

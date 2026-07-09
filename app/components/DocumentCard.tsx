@@ -306,7 +306,8 @@ const DocumentLink = styled(Link)<{
   cursor: var(--pointer);
   background: ${s("background")};
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  transition: transform var(--duration-fast) var(--ease-out),
+  transition:
+    transform var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out);
 
   ${Actions} {

@@ -23,7 +23,9 @@ type Options = {
  */
 export function useEntranceAnimation(options: Options = {}): MotionProps {
   const { delay = 0, disabled = false } = options;
-  const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const prefersReducedMotion = useMediaQuery(
+    "(prefers-reduced-motion: reduce)"
+  );
 
   return useMemo<MotionProps>(() => {
     if (disabled || prefersReducedMotion) {

@@ -7,6 +7,7 @@ export default function presentRelationship(relationship: Relationship) {
     documentId: relationship.documentId,
     reverseDocumentId: relationship.reverseDocumentId,
     userId: relationship.userId,
+    source: relationship.source ?? null,
     createdAt: relationship.createdAt,
     updatedAt: relationship.updatedAt,
   };

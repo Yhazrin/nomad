@@ -82,7 +82,8 @@ const Button = styled.button`
   background: none;
   border-radius: var(--radius-sm);
   -webkit-appearance: none;
-  transition: color var(--duration-fast) var(--ease-out),
+  transition:
+    color var(--duration-fast) var(--ease-out),
     background var(--duration-fast) var(--ease-out);
   ${undraggableOnDesktop()}
   ${extraArea(4)}

@@ -47,7 +47,9 @@ const defaultColors: Colors = {
 const spacing = {
   sidebarWidth: 260,
   sidebarRightWidth: 300,
-  sidebarCollapsedWidth: 16,
+  // A compact rail keeps the sidebar discoverable without leaving part of the
+  // navigation panel exposed when it is collapsed.
+  sidebarCollapsedWidth: 44,
   sidebarMinWidth: 200,
   sidebarMaxWidth: 600,
 };
@@ -252,14 +254,10 @@ export const buildDarkTheme = (input: Partial<Colors>): DefaultTheme => {
 
     // Dark mode uses slightly stronger shadows since dark surfaces
     // need more separation from the background.
-    shadow1:
-      "0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4)",
-    shadow2:
-      "0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4)",
-    shadow3:
-      "0 4px 8px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.5)",
-    shadow4:
-      "0 8px 16px rgba(0, 0, 0, 0.4), 0 24px 56px rgba(0, 0, 0, 0.6)",
+    shadow1: "0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4)",
+    shadow2: "0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4)",
+    shadow3: "0 4px 8px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.5)",
+    shadow4: "0 8px 16px rgba(0, 0, 0, 0.4), 0 24px 56px rgba(0, 0, 0, 0.6)",
 
     modalBackdrop: colors.black50,
     modalBackground: "#181c25",

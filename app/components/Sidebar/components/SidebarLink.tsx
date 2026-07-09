@@ -4,7 +4,6 @@ import styled, { useTheme, css } from "styled-components";
 import breakpoint from "styled-components-breakpoint";
 import EventBoundary from "@shared/components/EventBoundary";
 import { ellipsis, hover, s } from "@shared/styles";
-import { isMobile } from "@shared/utils/browser";
 import NudeButton from "~/components/NudeButton";
 import { UnreadBadge } from "~/components/UnreadBadge";
 import useClickIntent from "~/hooks/useClickIntent";
@@ -307,7 +306,8 @@ const Link = styled(NavLink)<{
   border: 0;
   width: 100%;
   /* Apple cubic-bezier — pair fast duration with the signature out curve. */
-  transition: transform var(--duration-fast) var(--ease-out),
+  transition:
+    transform var(--duration-fast) var(--ease-out),
     background-color var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out);
@@ -354,7 +354,8 @@ const Link = styled(NavLink)<{
     background: ${s("accent")};
     color: ${s("accentText")};
     /* Multi-layer shadow — close crisp + wide diffused (Apple rule). */
-    box-shadow: 0 1px 2px rgba(10, 132, 255, 0.18),
+    box-shadow:
+      0 1px 2px rgba(10, 132, 255, 0.18),
       0 4px 12px rgba(10, 132, 255, 0.16),
       inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
@@ -377,9 +378,12 @@ const Link = styled(NavLink)<{
   `}
 
   @media (hover: hover) {
-    &:hover ${Actions},
-    &:active ${Actions},
-    &:has([data-state="open"]) ${Actions} {
+    &:hover
+      ${Actions},
+      &:active
+      ${Actions},
+      &:has([data-state="open"])
+      ${Actions} {
       visibility: visible;
 
       svg {

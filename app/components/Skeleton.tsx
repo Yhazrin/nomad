@@ -57,7 +57,7 @@ const Bar = styled.div<{
   width: ${(p) => p.$width};
   height: ${(p) => p.$height};
   border-radius: ${(p) =>
-    p.$rounded ? "50%" : p.$radius ?? "var(--radius-sm)"};
+    p.$rounded ? "50%" : (p.$radius ?? "var(--radius-sm)")};
   background-color: ${s("backgroundSecondary")};
   background-image: linear-gradient(
     90deg,

@@ -9,7 +9,9 @@ import type Document from "~/models/Document";
 import type Revision from "~/models/Revision";
 import type Template from "~/models/Template";
 import { openDocumentInsights } from "~/actions/definitions/documents";
-import DocumentMeta, { Separator as BaseSeparator } from "~/components/DocumentMeta";
+import DocumentMeta, {
+  Separator as BaseSeparator,
+} from "~/components/DocumentMeta";
 import Fade from "~/components/Fade";
 import useCurrentTeam from "~/hooks/useCurrentTeam";
 import { useLocationSidebarContext } from "~/hooks/useLocationSidebarContext";

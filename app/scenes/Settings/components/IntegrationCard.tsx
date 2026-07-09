@@ -56,7 +56,8 @@ export const Card = styled.div`
       ? "rgba(255, 255, 255, 0.04)"
       : "rgba(15, 23, 42, 0.04)"};
   border-radius: var(--radius-lg);
-  transition: transform var(--duration-fast) var(--ease-out),
+  transition:
+    transform var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out);
   cursor: var(--pointer);
 

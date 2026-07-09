@@ -229,10 +229,7 @@ function DocumentHeader({
         <>
           <ObservingBanner />
           <SearchHighlightChip />
-          {!isDeleted && !isRevision && (
-            <Action>
-            </Action>
-          )}
+          {!isDeleted && !isRevision && <Action />}
           {!isDeleted && !isRevision && can.listViews && (
             <Collaborators
               document={document}
@@ -336,7 +333,8 @@ function DocumentHeader({
 }
 
 const StyledHeader = styled(Header)<{ $hidden: boolean; $scrolled: boolean }>`
-  transition: opacity var(--duration) var(--ease-out),
+  transition:
+    opacity var(--duration) var(--ease-out),
     box-shadow var(--duration) var(--ease-out),
     background var(--duration) var(--ease-out);
   ${(props) => props.$hidden && "opacity: 0;"}

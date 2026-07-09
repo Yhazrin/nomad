@@ -42,7 +42,8 @@ const NoticesWrapper = styled.div`
     color: ${(props) => props.theme.text};
     box-shadow: inset 0 0 0 1px
       ${(props) => transparentize(0.88, props.theme.accent)};
-    transition: background var(--duration) var(--ease-out),
+    transition:
+      background var(--duration) var(--ease-out),
       box-shadow var(--duration) var(--ease-out);
   }
 `;

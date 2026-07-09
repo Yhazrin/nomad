@@ -26,7 +26,8 @@ const RealButton = styled(ActionButton)<RealProps>`
   background: ${s("accent")};
   color: ${s("accentText")};
   /* Soft, multi-layer ambient shadow — Apple-style elevation */
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06),
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
     0 2px 6px rgba(10, 132, 255, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   /* Squircle proportions — radius follows height ~ 22% like iOS */
@@ -41,7 +42,8 @@ const RealButton = styled(ActionButton)<RealProps>`
   user-select: none;
   appearance: none !important;
   /* Apple cubic-bezier + gentle duration */
-  transition: background var(--duration-fast) var(--ease-out),
+  transition:
+    background var(--duration-fast) var(--ease-out),
     transform var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out);
   ${undraggableOnDesktop()}
@@ -56,7 +58,8 @@ const RealButton = styled(ActionButton)<RealProps>`
     background: ${(props) => darken(0.04, props.theme.accent)};
     /* Lift slightly on hover for kinetic feedback */
     transform: translateY(-0.5px);
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08),
+    box-shadow:
+      0 2px 4px rgba(15, 23, 42, 0.08),
       0 6px 14px rgba(10, 132, 255, 0.24),
       inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
@@ -64,7 +67,8 @@ const RealButton = styled(ActionButton)<RealProps>`
   /* Micro-press: Apple-like tactile feedback on click */
   &:active:not(:disabled) {
     transform: translateY(0) scale(0.98);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08),
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.08),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
     transition-duration: 80ms;
   }
@@ -101,8 +105,8 @@ const RealButton = styled(ActionButton)<RealProps>`
           : props.theme.buttonNeutralHoverBackground
       };
       box-shadow: 0 2px 4px rgba(15, 23, 42, 0.06), ${
-      props.theme.buttonNeutralBorder
-    } 0 0 0 1px inset;
+        props.theme.buttonNeutralBorder
+      } 0 0 0 1px inset;
       transform: translateY(-0.5px);
     }
 

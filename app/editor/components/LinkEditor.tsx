@@ -296,8 +296,7 @@ const InputWrapper = styled(Flex)`
 const SearchResults = styled(Scrollable)<{ $hasResults: boolean }>`
   background: ${s("menuBackground")};
   /* Apple-style layered shadow — tight close + wide diffused ambient. */
-  box-shadow: ${(props) =>
-    props.$hasResults ? "var(--shadow-3)" : "none"};
+  box-shadow: ${(props) => (props.$hasResults ? "var(--shadow-3)" : "none")};
   clip-path: inset(0px -100px -100px -100px);
   position: absolute;
   top: 100%;

@@ -109,7 +109,8 @@ const Button = styled(Flex)<{
   user-select: none;
   position: relative;
   cursor: var(--pointer);
-  transition: background var(--duration-fast) var(--ease-out),
+  transition:
+    background var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out);
 
   ${undraggableOnDesktop()}

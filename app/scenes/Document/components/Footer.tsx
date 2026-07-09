@@ -44,7 +44,8 @@ const Pill = styled.div`
   font-size: 12px;
   line-height: 1;
   color: ${(props) => props.theme.textSecondary};
-  transition: box-shadow var(--duration) var(--ease-out),
+  transition:
+    box-shadow var(--duration) var(--ease-out),
     transform var(--duration-fast) var(--ease-out);
 
   svg {

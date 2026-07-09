@@ -29,9 +29,10 @@ export const Background = styled(Fade)`
     background: radial-gradient(
       circle at center,
       ${(props) =>
-        props.theme.isDark
-          ? "rgba(10, 132, 255, 0.18)"
-          : "rgba(10, 132, 255, 0.08)"} 0%,
+          props.theme.isDark
+            ? "rgba(10, 132, 255, 0.18)"
+            : "rgba(10, 132, 255, 0.08)"}
+        0%,
       transparent 65%
     );
     pointer-events: none;
@@ -49,9 +50,10 @@ export const Background = styled(Fade)`
     background: radial-gradient(
       circle at center,
       ${(props) =>
-        props.theme.isDark
-          ? "rgba(175, 82, 222, 0.16)"
-          : "rgba(175, 82, 222, 0.07)"} 0%,
+          props.theme.isDark
+            ? "rgba(175, 82, 222, 0.16)"
+            : "rgba(175, 82, 222, 0.07)"}
+        0%,
       transparent 60%
     );
     pointer-events: none;

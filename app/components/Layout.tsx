@@ -54,12 +54,13 @@ const Layout = React.forwardRef(function Layout_(
           role="main"
           $isResizing={ui.sidebarIsResizing}
           $sidebarCollapsed={sidebarCollapsed}
+          $sidebarExpanded={!!sidebar && !sidebarCollapsed}
           $hasSidebar={!!sidebar}
           style={
             sidebarCollapsed
               ? undefined
               : {
-                  marginInlineStart: `${ui.sidebarWidth}px`,
+                  marginInlineStart: `calc(${ui.sidebarWidth}px + 12px)`,
                 }
           }
         >
@@ -72,16 +73,38 @@ const Layout = React.forwardRef(function Layout_(
   );
 });
 
+/**
+ * Three-tier responsive shell contract (Phase 1):
+ *   - `< desktop` (< 1025px): both rails collapse — the left sidebar becomes a
+ *     mobile drawer and the context inspector flows below the canvas.
+ *   - `desktop … desktopLarge` (1025–1599px): two columns — floating left
+ *     sidebar + full-width canvas; the inspector rail stays collapsed.
+ *   - `>= desktopLarge` (1600px): three columns — ~260px sidebar, `1fr` canvas,
+ *     and a 280px context inspector.
+ *
+ * The left sidebar is `position: fixed` and the canvas offsets via margin, so
+ * the columns are expressed with margins + a shared width token rather than a
+ * literal CSS grid (a grid track cannot host a fixed-positioned child, and a
+ * grid rewrite here would remount the shell). Scenes read
+ * `--inspector-rail-width` to reserve the third column.
+ */
 const Container = styled(Flex)`
+  --inspector-rail-width: 0px;
+
   background: ${s("background")};
   position: relative;
   width: 100%;
   min-height: 100%;
+
+  ${breakpoint("desktopLarge")`
+    --inspector-rail-width: 280px;
+  `};
 `;
 
 type ContentProps = {
   $isResizing?: boolean;
   $sidebarCollapsed?: boolean;
+  $sidebarExpanded?: boolean;
   $hasSidebar?: boolean;
   theme: DefaultTheme;
 };
@@ -91,7 +114,7 @@ const Content = styled(Flex)<ContentProps>`
   transition: ${(props) =>
     props.$isResizing
       ? "none"
-      : `margin-inline-start var(--duration-slow) var(--ease-spring)`};
+      : `margin-inline-start var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out)`};
 
   @media print {
     margin: 0 !important;
@@ -108,6 +131,18 @@ const Content = styled(Flex)<ContentProps>`
       props.$hasSidebar &&
       props.$sidebarCollapsed &&
       `margin-inline-start: calc(${props.theme.sidebarCollapsedWidth}px + 12px);`}
+
+    ${(props: ContentProps) =>
+      props.$hasSidebar &&
+      props.$sidebarExpanded &&
+      "transform: translateX(18px);"}
+
+    [dir="rtl"] & {
+      ${(props: ContentProps) =>
+        props.$hasSidebar &&
+        props.$sidebarExpanded &&
+        "transform: translateX(-18px);"}
+    }
   `};
 `;
 

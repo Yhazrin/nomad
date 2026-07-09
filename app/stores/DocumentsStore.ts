@@ -8,6 +8,7 @@ import {
   type DateFilter,
   type StatusFilter,
 } from "@shared/types";
+import type { SemanticRelationshipEdge } from "@shared/types/relationships";
 import { subtractDate } from "@shared/utils/date";
 import { bytesToHumanReadable } from "@shared/utils/files";
 import naturalSort from "@shared/utils/naturalSort";
@@ -52,6 +53,9 @@ export default class DocumentsStore extends Store<Document> {
 
   @observable
   similar: Map<string, string[]> = new Map();
+
+  @observable
+  semanticEdges: Map<string, SemanticRelationshipEdge[]> = new Map();
 
   @observable
   movingDocumentId: string | null | undefined;
@@ -264,17 +268,38 @@ export default class DocumentsStore extends Store<Document> {
 
       const backlinkIds: string[] = [];
       const similarIds: string[] = [];
+      const semanticEdges: SemanticRelationshipEdge[] = [];
 
       for (const relationship of res.data.relationships) {
         if (relationship.type === "backlink") {
           backlinkIds.push(relationship.reverseDocumentId);
         } else if (relationship.type === "similar") {
           similarIds.push(relationship.reverseDocumentId);
+        } else {
+          // All other types are semantic typed edges.
+          const sourceDocumentId =
+            relationship.documentId === documentId
+              ? relationship.documentId
+              : relationship.reverseDocumentId;
+          const targetDocumentId =
+            relationship.documentId === documentId
+              ? relationship.reverseDocumentId
+              : relationship.documentId;
+          semanticEdges.push({
+            id: relationship.id,
+            type: relationship.type as SemanticRelationshipEdge["type"],
+            sourceDocumentId,
+            targetDocumentId,
+            createdById: relationship.userId,
+            source: relationship.source ?? null,
+            createdAt: relationship.createdAt,
+          });
         }
       }
 
       this.backlinks.set(documentId, backlinkIds);
       this.similar.set(documentId, similarIds);
+      this.semanticEdges.set(documentId, semanticEdges);
     });
   };
 
@@ -295,6 +320,53 @@ export default class DocumentsStore extends Store<Document> {
       "asc"
     );
   }
+
+  /**
+   * Returns the child documents of the given document id, filtered from
+   * the local store. Children are documents whose `parentDocumentId`
+   * equals the supplied id.
+   *
+   * @param documentId - The id of the parent document.
+   * @returns The list of child documents, ordered by `updatedAt` desc.
+   */
+  getChildDocuments(documentId: string): Document[] {
+    return orderBy(
+      this.orderedData.filter(
+        (doc) => doc.parentDocumentId === documentId && !doc.isDeleted
+      ),
+      "updatedAt",
+      "desc"
+    );
+  }
+
+  /**
+   * Returns the semantic relationship edges attached to the given
+   * document id (both incoming and outgoing), ordered by creation time.
+   *
+   * @param documentId - The id of the document to look up.
+   * @returns The list of semantic edges connected to the document.
+   */
+  getSemanticEdges(documentId: string): SemanticRelationshipEdge[] {
+    const edges = this.semanticEdges.get(documentId) ?? [];
+    return [...edges].sort((a, b) =>
+      a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0
+    );
+  }
+
+  /**
+   * Stores a list of semantic relationship edges for a document,
+   * overwriting any existing entry.
+   *
+   * @param documentId - The id of the document to associate edges with.
+   * @param edges - The edges to store.
+   */
+  @action
+  setSemanticEdges = (
+    documentId: string,
+    edges: SemanticRelationshipEdge[]
+  ) => {
+    this.semanticEdges.set(documentId, edges);
+  };
 
   @action
   fetchChildDocuments = async (documentId: string): Promise<void> => {

@@ -1,8 +1,9 @@
 import { observer } from "mobx-react";
 import { useEffect, useRef, Fragment, useMemo, useState } from "react";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import styled from "styled-components";
 import type Document from "~/models/Document";
+import { s } from "@shared/styles";
 import Fade from "~/components/Fade";
 import { determineSidebarContext } from "~/components/Sidebar/components/SidebarContext";
 import Tab from "~/components/Tab";
@@ -22,6 +23,7 @@ type Props = {
 type TabType = "children" | "backlinks";
 
 function References({ document }: Props) {
+  const { t } = useTranslation();
   const { documents } = useStores();
   const user = useCurrentUser({ rejectOnEmpty: false });
   const locationSidebarContext = useLocationSidebarContext();
@@ -42,75 +44,82 @@ function References({ document }: Props) {
   const isBacklinksTab = activeTab === "backlinks" || !showChildDocuments;
   const height = Math.max(backlinks.length, children.length) * 40;
   const Component = shouldFade.current ? Fade : Fragment;
+  const connections = children.length + backlinks.length;
 
   return showBacklinks || showChildDocuments ? (
-    <Component>
-      <Tabs>
-        {showChildDocuments && (
-          <Tab
-            active={!isBacklinksTab}
-            onClick={() => setActiveTab("children")}
-          >
-            <Trans>Documents</Trans>
-          </Tab>
-        )}
-        {showBacklinks && (
-          <Tab
-            active={isBacklinksTab}
-            onClick={() => setActiveTab("backlinks")}
-          >
-            <Trans>Backlinks</Trans>
-          </Tab>
-        )}
-      </Tabs>
-      <Content style={{ height }}>
-        {showBacklinks && (
-          <List $active={isBacklinksTab}>
-            {backlinks.map((node) => {
-              // If we have the document in the store already then use it to get the extra
-              // contextual info, otherwise the collection node will do (only has title and id)
-              const backlinkedDocument = documents.get(node.id);
-              return (
-                <ReferenceListItem
-                  anchor={backlinkedDocument?.urlId}
-                  key={node.id}
-                  document={backlinkedDocument || node}
-                  showCollection={
-                    backlinkedDocument?.collectionId !== document.collectionId
-                  }
-                  sidebarContext={
-                    user && backlinkedDocument
-                      ? determineSidebarContext({
-                          document: backlinkedDocument,
-                          user,
-                          currentContext: locationSidebarContext,
-                        })
-                      : undefined
-                  }
-                />
-              );
-            })}
-          </List>
-        )}
-        {showChildDocuments && (
-          <List $active={!isBacklinksTab}>
-            {children.map((node) => {
-              // If we have the document in the store already then use it to get the extra
-              // contextual info, otherwise the collection node will do (only has title and id)
-              const document = documents.get(node.id);
-              return (
-                <ReferenceListItem
-                  key={node.id}
-                  document={document || node}
-                  showCollection={false}
-                  sidebarContext={locationSidebarContext}
-                />
-              );
-            })}
-          </List>
-        )}
-      </Content>
-    </Component>
+    <RelationshipPanel>
+      <PanelHeading>
+        <PanelTitle>{t("Connections")}</PanelTitle>
+        <ConnectionCount>{connections}</ConnectionCount>
+      </PanelHeading>
+      <Component>
+        <Tabs>
+          {showChildDocuments && (
+            <Tab
+              active={!isBacklinksTab}
+              onClick={() => setActiveTab("children")}
+            >
+              <Trans>Documents</Trans>
+            </Tab>
+          )}
+          {showBacklinks && (
+            <Tab
+              active={isBacklinksTab}
+              onClick={() => setActiveTab("backlinks")}
+            >
+              <Trans>Backlinks</Trans>
+            </Tab>
+          )}
+        </Tabs>
+        <Content style={{ height }}>
+          {showBacklinks && (
+            <List $active={isBacklinksTab}>
+              {backlinks.map((node) => {
+                // If we have the document in the store already then use it to get the extra
+                // contextual info, otherwise the collection node will do (only has title and id)
+                const backlinkedDocument = documents.get(node.id);
+                return (
+                  <ReferenceListItem
+                    anchor={backlinkedDocument?.urlId}
+                    key={node.id}
+                    document={backlinkedDocument || node}
+                    showCollection={
+                      backlinkedDocument?.collectionId !== document.collectionId
+                    }
+                    sidebarContext={
+                      user && backlinkedDocument
+                        ? determineSidebarContext({
+                            document: backlinkedDocument,
+                            user,
+                            currentContext: locationSidebarContext,
+                          })
+                        : undefined
+                    }
+                  />
+                );
+              })}
+            </List>
+          )}
+          {showChildDocuments && (
+            <List $active={!isBacklinksTab}>
+              {children.map((node) => {
+                // If we have the document in the store already then use it to get the extra
+                // contextual info, otherwise the collection node will do (only has title and id)
+                const document = documents.get(node.id);
+                return (
+                  <ReferenceListItem
+                    key={node.id}
+                    document={document || node}
+                    showCollection={false}
+                    sidebarContext={locationSidebarContext}
+                  />
+                );
+              })}
+            </List>
+          )}
+        </Content>
+      </Component>
+    </RelationshipPanel>
   ) : null;
 }
 
@@ -169,6 +178,32 @@ function useBacklinks(
 
 const Content = styled.div`
   position: relative;
+`;
+
+const RelationshipPanel = styled.section`
+  min-width: 0;
+`;
+
+const PanelHeading = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 6px;
+`;
+
+const PanelTitle = styled.h2`
+  margin: 0;
+  color: ${s("textSecondary")};
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+`;
+
+const ConnectionCount = styled.span`
+  color: ${s("textTertiary")};
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 `;
 
 const List = styled.ul<{ $active: boolean }>`

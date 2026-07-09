@@ -3,7 +3,8 @@ import * as React from "react";
 import { mergeRefs } from "react-merge-refs";
 import { useWebHaptics } from "web-haptics/react";
 import { useLocation } from "react-router-dom";
-import styled, { css, useTheme } from "styled-components";
+import { SidebarIcon } from "outline-icons";
+import styled, { useTheme } from "styled-components";
 import breakpoint from "styled-components-breakpoint";
 import { depths, s } from "@shared/styles";
 import { Avatar } from "~/components/Avatar";
@@ -15,7 +16,6 @@ import useStores from "~/hooks/useStores";
 import AccountMenu from "~/menus/AccountMenu";
 import { fadeOnDesktopBackgrounded } from "~/styles";
 import { fadeIn } from "~/styles/animations";
-import Desktop from "~/utils/Desktop";
 import NotificationIcon from "../Notifications/NotificationIcon";
 import NotificationsPopover from "../Notifications/NotificationsPopover";
 import { TooltipProvider } from "../TooltipContext";
@@ -51,19 +51,18 @@ const Sidebar = React.forwardRef<HTMLDivElement, Props>(function Sidebar_(
   const user = useCurrentUser({ rejectOnEmpty: false });
   const isMobile = useMobile();
   const width = ui.sidebarWidth;
-  const collapsed = ui.sidebarIsClosed && canCollapse;
+  // A compact rail is used on desktop. On mobile the sidebar remains a
+  // full-width drawer even if the desktop preference is set to collapsed.
+  const collapsed = !isMobile && ui.sidebarIsClosed && canCollapse;
   const maxWidth = theme.sidebarMaxWidth;
   const minWidth = theme.sidebarMinWidth + 16; // padding
   const { trigger } = useWebHaptics();
   const direction = useDirection();
 
   const [offset, setOffset] = React.useState(0);
-  const [isHovering, setHovering] = React.useState(false);
   const [isAnimating, setAnimating] = React.useState(false);
   const [isResizing, setResizing] = React.useState(false);
-  const [hasPointerMoved, setPointerMoved] = React.useState(false);
   const isSmallerThanMinimum = width < minWidth;
-  const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const internalRef = React.useRef<HTMLDivElement | null>(null);
   const mergedRef = React.useMemo(() => mergeRefs([internalRef, ref]), [ref]);
 
@@ -112,10 +111,6 @@ const Sidebar = React.forwardRef<HTMLDivElement, Props>(function Sidebar_(
     }
   }, [ui, isSmallerThanMinimum, minWidth, width, canCollapse]);
 
-  const handleBlur = React.useCallback(() => {
-    setHovering(false);
-  }, []);
-
   const handleMouseDown = React.useCallback(
     (event) => {
       event.preventDefault();
@@ -131,76 +126,6 @@ const Sidebar = React.forwardRef<HTMLDivElement, Props>(function Sidebar_(
     },
     [width, direction]
   );
-
-  const handlePointerActivity = React.useCallback(() => {
-    if (ui.sidebarIsClosed) {
-      // clear the timeout when mouse exits
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
-      }
-      setHovering(document.hasFocus());
-      setPointerMoved(true);
-    }
-  }, [ui.sidebarIsClosed]);
-
-  const handlePointerLeave = React.useCallback(
-    (ev) => {
-      if (hasPointerMoved) {
-        // clear any previous timeout
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-        }
-
-        // add a short delay when mouse exits the sidebar before closing
-        hoverTimeoutRef.current = setTimeout(() => {
-          const withinSidebar =
-            direction === "rtl"
-              ? ev.pageX > window.innerWidth - width
-              : ev.pageX < width;
-
-          setHovering(
-            document.hasFocus() &&
-              withinSidebar &&
-              ev.pageY < window.innerHeight &&
-              ev.pageY > 0
-          );
-        }, 500);
-      }
-    },
-    [width, direction, hasPointerMoved]
-  );
-
-  React.useEffect(() => {
-    if (ui.sidebarIsClosed) {
-      setHovering(false);
-      setPointerMoved(false);
-    }
-  }, [ui.sidebarIsClosed]);
-
-  // Reset stale hover state when the sidebar becomes visible after being
-  // hidden via display:none (e.g. returning from settings). Without this, a
-  // pointer-leave event never fires when navigating away while hovering, so
-  // isHovering stays true and the sidebar appears expanded until the cursor
-  // re-enters and leaves.
-  React.useEffect(() => {
-    const el = internalRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") {
-      return;
-    }
-    let wasVisible = false;
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        const nowVisible = entry.isIntersecting;
-        if (nowVisible && !wasVisible) {
-          setHovering(false);
-          setPointerMoved(false);
-        }
-        wasVisible = nowVisible;
-      }
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
 
   React.useEffect(() => {
     if (isAnimating) {
@@ -226,14 +151,11 @@ const Sidebar = React.forwardRef<HTMLDivElement, Props>(function Sidebar_(
       document.body.style.cursor = "initial";
     }
 
-    window.addEventListener("blur", handleBlur);
-
     return () => {
-      window.removeEventListener("blur", handleBlur);
       document.removeEventListener("mousemove", handleDrag);
       document.removeEventListener("mouseup", handleStopDrag);
     };
-  }, [isResizing, handleDrag, handleBlur, handleStopDrag]);
+  }, [isResizing, handleDrag, handleStopDrag]);
 
   const handleReset = React.useCallback(() => {
     ui.set({ sidebarWidth: theme.sidebarWidth });
@@ -251,14 +173,19 @@ const Sidebar = React.forwardRef<HTMLDivElement, Props>(function Sidebar_(
 
   const style = React.useMemo(
     () => ({
-      width: `${width}px`,
+      width: `${collapsed ? theme.sidebarCollapsedWidth : width}px`,
     }),
-    [width]
+    [collapsed, theme.sidebarCollapsedWidth, width]
   );
 
   const handleCloseSidebar = () => {
     void trigger("light");
     ui.toggleMobileSidebar();
+  };
+
+  const handleExpandSidebar = () => {
+    void trigger("light");
+    ui.expandSidebar();
   };
 
   return (
@@ -268,18 +195,22 @@ const Sidebar = React.forwardRef<HTMLDivElement, Props>(function Sidebar_(
         ref={mergedRef}
         style={style}
         $hidden={hidden}
-        $isHovering={isHovering}
         $isAnimating={isAnimating}
-        $isSmallerThanMinimum={isSmallerThanMinimum}
         $mobileSidebarVisible={ui.mobileSidebarVisible}
         $collapsed={collapsed}
         $isMobile={isMobile}
         className={className}
-        onPointerDown={handlePointerActivity}
-        onPointerMove={handlePointerActivity}
-        onPointerLeave={handlePointerLeave}
         column
       >
+        {collapsed && (
+          <CollapsedToggle
+            type="button"
+            aria-label={t("Expand sidebar")}
+            onClick={handleExpandSidebar}
+          >
+            <SidebarIcon />
+          </CollapsedToggle>
+        )}
         {children}
 
         {user && (
@@ -332,27 +263,10 @@ const Backdrop = styled.a`
 type ContainerProps = {
   $mobileSidebarVisible: boolean;
   $isAnimating: boolean;
-  $isSmallerThanMinimum: boolean;
-  $isHovering: boolean;
   $collapsed: boolean;
   $hidden: boolean;
   $isMobile: boolean;
 };
-
-const hoverStyles = (props: ContainerProps) => `
-  transform: none !important;
-  box-shadow: ${
-    props.$collapsed
-      ? "0 0 0 1px rgba(15, 23, 42, 0.06), var(--shadow-2)"
-      : props.$isSmallerThanMinimum
-        ? "rgba(0, 0, 0, 0.1) inset -1px 0 2px"
-        : "0 0 0 1px rgba(15, 23, 42, 0.06), var(--shadow-2)"
-  };
-
-  ${ToggleButton} {
-    opacity: 1;
-  }
-`;
 
 const Container = styled(Flex)<ContainerProps>`
   position: fixed;
@@ -366,9 +280,7 @@ const Container = styled(Flex)<ContainerProps>`
     box-shadow var(--duration-fast) var(--ease-out),
     transform 250ms cubic-bezier(0.34, 1.15, 0.64, 1)
       ${(props: ContainerProps) =>
-        props.$isAnimating
-          ? `, width var(--duration) var(--ease-out)`
-          : ""};
+        props.$isAnimating ? `, width var(--duration) var(--ease-out)` : ""};
   transform: translateX(
     ${(props) => (props.$mobileSidebarVisible ? 0 : "-100%")}
   );
@@ -389,19 +301,12 @@ const Container = styled(Flex)<ContainerProps>`
     transform: none;
   }
 
-  /* Apply the show/hide opacity to ALL direct children so every nav
-     section, account menu, and toggle button fades together when the
-     sidebar collapses. Earlier the selector only matched direct div
-     children, which leaked AccountMenu / sidebar children rendered as
-     other tags into the visible 16px strip when collapsed. */
+  /* Fade the full navigation tree while the compact rail remains available. */
   & > * {
     transition: opacity var(--duration-fast) var(--ease-out);
     opacity: ${(props) => {
       if (props.$hidden) {
         return "0";
-      }
-      if (props.$isHovering) {
-        return "1";
       }
       if (props.$isMobile) {
         return props.$mobileSidebarVisible ? "1" : "0";
@@ -411,9 +316,7 @@ const Container = styled(Flex)<ContainerProps>`
     }};
   }
 
-  /* When collapsed, the sidebar reduces to a thin vertical "tab handle"
-     hugging the window edge. Aggressive glass / shadow / background tint
-     create visible artifacts on the 16px strip, so we strip them down. */
+  /* The compact rail has no panel surface behind it. */
   ${(props: ContainerProps) =>
     props.$collapsed &&
     `
@@ -422,11 +325,10 @@ const Container = styled(Flex)<ContainerProps>`
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
       border: none;
+      overflow: hidden;
     `}
 
-  /* Hide the resize grab handle when collapsed — otherwise its 2px sliver
-     is visible on the right edge of the floating collapsed strip and
-     creates an awkward "corner" artifact. */
+  /* The compact rail is not resizable. */
   & > [class*="ResizeBorder"] {
     opacity: ${(props: ContainerProps) => (props.$collapsed ? "0" : "1")};
     pointer-events: ${(props: ContainerProps) =>
@@ -445,8 +347,8 @@ const Container = styled(Flex)<ContainerProps>`
     height: calc(100vh - 24px);
     min-height: calc(100vh - 24px);
     min-width: 0;
-    /* Smaller radius when collapsed (16px strip) so the visible edge looks
-       like a clean tab rather than a chunky pill peeking out. */
+    /* The collapsed state is a deliberate, clickable rail rather than a
+       partially translated version of the full navigation panel. */
     border-radius: ${(props: ContainerProps) =>
       props.$collapsed ? "var(--radius-sm)" : "var(--radius-xl)"};
     /* Layered ring + soft ambient elevation — "floating in light" feel */
@@ -459,21 +361,12 @@ const Container = styled(Flex)<ContainerProps>`
     background: color-mix(in srgb, ${s("sidebarBackground")} 78%, transparent);
     transition:
       box-shadow var(--duration-fast) var(--ease-out),
-      transform var(--duration-slow) var(--ease-spring)${(props: ContainerProps) =>
-        props.$isAnimating
-          ? `, width var(--duration-slow) var(--ease-spring)`
-          : ""};
-    transform: translateX(${(props: ContainerProps) =>
-      props.$collapsed
-        ? `calc(-100% + ${Desktop.hasInsetTitlebar() ? 8 : 16}px)`
-        : 0});
+      width var(--duration-slow) var(--ease-out);
+    transform: none;
 
     [dir="rtl"] & {
-      transform: translateX(${(props: ContainerProps) =>
-        props.$collapsed ? `calc(100% - 8px)` : 0});
+      transform: none;
     }
-
-    ${(props: ContainerProps) => props.$isHovering && css(hoverStyles)}
 
     &:hover {
       ${ToggleButton} {
@@ -481,14 +374,46 @@ const Container = styled(Flex)<ContainerProps>`
       }
     }
 
-    &:focus-within {
-      ${hoverStyles}
-
-      & > div {
-        opacity: 1;
-      }
-    }
   `};
+`;
+
+const CollapsedToggle = styled.button`
+  position: absolute;
+  top: 14px;
+  inset-inline-start: 6px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: ${s("sidebarText")};
+  background: color-mix(in srgb, ${s("sidebarBackground")} 84%, transparent);
+  cursor: pointer;
+  z-index: 1;
+  opacity: 1 !important;
+  pointer-events: auto;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+
+  &:hover,
+  &:focus-visible {
+    color: ${s("accent")};
+    background: ${s("sidebarControlHoverBackground")};
+    outline: none;
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
 `;
 
 export default observer(Sidebar);

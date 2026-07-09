@@ -97,4 +97,69 @@ router.post(
   }
 );
 
+router.post(
+  "relationships.create",
+  auth(),
+  validate(T.RelationshipsCreateSchema),
+  async (ctx: APIContext<T.RelationshipsCreateReq>) => {
+    const { sourceDocumentId, targetDocumentId, type, source } = ctx.input.body;
+    const { user } = ctx.state.auth;
+
+    const sourceDocument = await Document.findByPk(sourceDocumentId, {
+      userId: user.id,
+      rejectOnEmpty: true,
+    });
+    authorize(user, "update", sourceDocument);
+
+    const targetDocument = await Document.findByPk(targetDocumentId, {
+      userId: user.id,
+      rejectOnEmpty: true,
+    });
+    authorize(user, "read", targetDocument);
+
+    const relationship = await Relationship.create({
+      userId: user.id,
+      documentId: sourceDocumentId,
+      reverseDocumentId: targetDocumentId,
+      type,
+      source: source ?? null,
+    });
+
+    const documents = [sourceDocument, targetDocument];
+
+    ctx.body = {
+      data: {
+        relationship: presentRelationship(relationship),
+        documents: await presentDocuments(ctx, documents),
+      },
+      policies: presentPolicies(user, documents),
+    };
+  }
+);
+
+router.post(
+  "relationships.delete",
+  auth(),
+  validate(T.RelationshipsDeleteSchema),
+  async (ctx: APIContext<T.RelationshipsDeleteReq>) => {
+    const { id } = ctx.input.body;
+    const { user } = ctx.state.auth;
+
+    const relationship = await Relationship.findByPk(id, {
+      rejectOnEmpty: true,
+    });
+    const sourceDocument = await Document.findByPk(relationship.documentId, {
+      userId: user.id,
+      rejectOnEmpty: true,
+    });
+    authorize(user, "update", sourceDocument);
+
+    await relationship.destroy();
+
+    ctx.body = {
+      success: true,
+    };
+  }
+);
+
 export default router;

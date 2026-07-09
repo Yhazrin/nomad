@@ -34,6 +34,7 @@ import { documentHistoryPath, documentEditPath } from "~/utils/routeHelpers";
 import { useDocumentSave } from "../hooks/useDocumentSave";
 import Container from "./Container";
 import Contents from "./Contents";
+import ContextRail from "./ContextRail";
 import Editor from "./Editor";
 import Header from "./Header";
 import Notices from "./Notices";
@@ -420,11 +421,7 @@ function DocumentScene({
                         canUpdate={abilities.update}
                         canComment={abilities.comment}
                         autoFocus={document.createdAt === document.updatedAt}
-                      >
-                        <ReferencesWrapper>
-                          <References document={document} />
-                        </ReferencesWrapper>
-                      </Editor>
+                      />
                     </>
                   )}
                 </MeasuredContainer>
@@ -438,6 +435,12 @@ function DocumentScene({
                 )}
               </React.Suspense>
             </Main>
+            <ContextRailMobile>
+              <ContextRail document={document} />
+            </ContextRailMobile>
+            <ConnectionsRail>
+              <References document={document} />
+            </ConnectionsRail>
           </DocumentLayout>
           {children}
         </Container>
@@ -452,6 +455,8 @@ type MainProps = {
 };
 
 const Main = styled.div<MainProps>`
+  flex: 1;
+  min-width: 0;
   margin-top: 4px;
 
   ${breakpoint("tablet")`
@@ -548,10 +553,8 @@ const Background = styled(Container)`
 `;
 
 /**
- * Layout wrapper that holds the editor `Main` and the right-rail inspector.
- * On desktop ≥ 1280px the inspector takes 280px; the editor flexes to fill
- * the remaining space. Below that threshold the inspector collapses to
- * display:none, and this becomes a plain vertical stack.
+ * Layout wrapper that keeps reading centered while surfacing document
+ * relationships as a right-side context rail on wide screens.
  */
 const DocumentLayout = styled.div`
   display: flex;
@@ -565,12 +568,47 @@ const DocumentLayout = styled.div`
   }
 `;
 
-const ReferencesWrapper = styled.div`
-  margin: 12px 0 60px;
+const ConnectionsRail = styled.aside`
+  width: 100%;
+  max-width: calc(${EditorStyleHelper.documentWidth} + 88px);
+  box-sizing: border-box;
+  margin: 0 auto 60px;
+  padding: 0 44px;
 
-  ${breakpoint("tablet")`
-    margin-bottom: 12px;
-  `}
+  &:empty {
+    display: none;
+  }
+
+  @media print {
+    display: none;
+  }
+
+  @media (min-width: 1600px) {
+    position: sticky;
+    top: calc(var(--header-offset) + 32px);
+    flex: 0 0 248px;
+    width: 248px;
+    max-height: calc(100vh - var(--header-offset) - 56px);
+    margin: 112px 36px 0 0;
+    padding: 0 0 0 22px;
+    overflow-y: auto;
+    border-inline-start: 1px solid ${s("divider")};
+  }
+`;
+
+/**
+ * On viewports below `desktopLarge` (1600px) the inspector is rendered as a
+ * full-width block that flows below the document content. The `InspectorRail`
+ * primitive handles this automatically by collapsing to a `width: 100%` and
+ * flex-column flow until the breakpoint kicks in, so a thin wrapper is
+ * sufficient here.
+ */
+const ContextRailMobile = styled.section`
+  width: 100%;
+  margin: 0 auto 24px;
+  padding: 0 44px;
+  box-sizing: border-box;
+  max-width: calc(${EditorStyleHelper.documentWidth} + 88px);
 
   @media print {
     display: none;
